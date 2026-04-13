@@ -1,0 +1,47 @@
+{
+  "labels": [
+    "O",
+    "B_LOC",
+    "B_ORG",
+    "B_PER",
+    "B_T",
+    "I_LOC",
+    "I_ORG",
+    "I_PER",
+    "I_T"
+  ],
+  "label_counts": {
+    "O": 17182664,
+    "B_T": 180819,
+    "I_T": 494698,
+    "B_LOC": 206640,
+    "I_LOC": 326891,
+    "B_ORG": 15081,
+    "I_ORG": 33203,
+    "B_PER": 182664,
+    "I_PER": 352243
+  },
+  "label2id": {
+    "O": 0,
+    "B_LOC": 1,
+    "B_ORG": 2,
+    "B_PER": 3,
+    "B_T": 4,
+    "I_LOC": 5,
+    "I_ORG": 6,
+    "I_PER": 7,
+    "I_T": 8
+  },
+  "id2label": {
+    "0": "O",
+    "1": "B_LOC",
+    "2": "B_ORG",
+    "3": "B_PER",
+    "4": "B_T",
+    "5": "I_LOC",
+    "6": "I_ORG",
+    "7": "I_PER",
+    "8": "I_T"
+  },
+  "num_labels": 9
+}
