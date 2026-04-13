@@ -172,6 +172,14 @@ def _clone_stage5_config(config: Mapping[str, Any]) -> Dict[str, Any]:
     merged["embedding_lr"] = float(merged.get("embedding_lr", 5e-4))
     merged["classifier_lr"] = float(merged.get("classifier_lr", merged["peak_lr"]))
     merged["crf_lr"] = float(merged.get("crf_lr", merged["peak_lr"]))
+    # 服务器通常只负责训练与导出结果，本地图表可在下载产物后统一补画；
+    # 因此默认让 cloud_train 关闭绘图，而 local_debug 保持开启。
+    merged["generate_figures"] = bool(
+        merged.get("generate_figures", merged["profile"] != "cloud_train")
+    )
+    merged["update_project_summary"] = bool(
+        merged.get("update_project_summary", merged["profile"] != "cloud_train")
+    )
     merged["sliding_overlap"] = int(merged.get("sliding_overlap", 64))
     merged["shuffle_within_bucket"] = bool(merged.get("shuffle_within_bucket", True))
     merged["max_train_samples"] = merged.get("max_train_samples")
@@ -1337,20 +1345,27 @@ def train_scratch(config: Mapping[str, Any]) -> Path:
 
     data_report_path = normalized_config["data_dir"] / "data_report.json"
     label_stats_path = normalized_config["data_dir"] / "label_stats.json"
-    if data_report_path.exists() and label_stats_path.exists():
-        generate_data_figures(
-            data_report_path=data_report_path,
-            label_stats_path=label_stats_path,
+    if bool(normalized_config["generate_figures"]):
+        if data_report_path.exists() and label_stats_path.exists():
+            generate_data_figures(
+                data_report_path=data_report_path,
+                label_stats_path=label_stats_path,
+                figure_dir=figures_dir,
+            )
+        generate_training_figures(
+            training_log_path=experiment_dirs["experiment_dir"] / "training_log.json",
             figure_dir=figures_dir,
         )
-    generate_training_figures(
-        training_log_path=experiment_dirs["experiment_dir"] / "training_log.json",
-        figure_dir=figures_dir,
-    )
-    generate_project_summary_artifacts(
-        output_root=normalized_config["output_root"],
-        data_dir=normalized_config["data_dir"],
-    )
+    else:
+        print("Skip Stage5 figure generation (generate_figures=False).")
+
+    if bool(normalized_config["update_project_summary"]):
+        generate_project_summary_artifacts(
+            output_root=normalized_config["output_root"],
+            data_dir=normalized_config["data_dir"],
+        )
+    else:
+        print("Skip project summary refresh (update_project_summary=False).")
 
     print("=== Stage5 Prediction Summary ===")
     print(f"Experiment dir: {experiment_dirs['experiment_dir']}")
